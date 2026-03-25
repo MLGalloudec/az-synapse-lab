@@ -6,6 +6,7 @@ This repo now covers the current foundation of the Synapse lab with Terraform:
 - the storage account configured for ADLS Gen2
 - the filesystem the Synapse workspace will later use as its default data lake
 - the Synapse workspace itself
+- the Synapse Spark pool for notebook execution
 
 ## What This Creates
 
@@ -18,6 +19,9 @@ This repo now covers the current foundation of the Synapse lab with Terraform:
 - Synapse workspace: from `synapse_workspace_name`
 - Synapse managed resource group: from `synapse_managed_resource_group_name`
 - Synapse managed virtual network: `true` by default
+- Spark pool: from `synapse_spark_pool_name`
+- Spark pool size: `Small` memory-optimized nodes
+- Spark pool auto-pause: `15` minutes
 
 The resource group name is fixed and descriptive for the lab. The storage account name includes a random suffix because Azure storage account names must be globally unique.
 
@@ -39,7 +43,7 @@ az account set --subscription "<subscription-id-or-name>"
 
 ## Files
 
-- `main.tf`: Terraform configuration for the resource group, storage account, ADLS Gen2 filesystem, and Synapse workspace
+- `main.tf`: Terraform configuration for the resource group, storage account, ADLS Gen2 filesystem, Synapse workspace, and Spark pool
 - `scripts/rg.sh`: Helper script for Terraform create/destroy operations
 
 ## Synapse Workspace Variables
@@ -52,6 +56,13 @@ The Terraform uses these workspace inputs:
 - `synapse_sql_admin_password`
 - `synapse_managed_virtual_network_enabled`
 - `synapse_public_network_access_enabled`
+- `synapse_spark_pool_name`
+- `synapse_spark_node_size_family`
+- `synapse_spark_node_size`
+- `synapse_spark_cache_size`
+- `synapse_spark_autoscale_min_node_count`
+- `synapse_spark_autoscale_max_node_count`
+- `synapse_spark_autopause_delay_in_minutes`
 
 For local development, copy the example variables file and set your own values:
 
@@ -71,6 +82,7 @@ The resources are now built in this order:
 - storage account
 - ADLS Gen2 filesystem
 - Synapse workspace
+- Synapse Spark pool
 
 ## Usage
 

@@ -51,6 +51,48 @@ variable "synapse_public_network_access_enabled" {
   default     = true
 }
 
+variable "synapse_spark_pool_name" {
+  description = "Name of the Synapse Spark pool."
+  type        = string
+  default     = "spark01"
+}
+
+variable "synapse_spark_node_size_family" {
+  description = "Node size family for the Synapse Spark pool."
+  type        = string
+  default     = "MemoryOptimized"
+}
+
+variable "synapse_spark_node_size" {
+  description = "Node size for the Synapse Spark pool."
+  type        = string
+  default     = "Small"
+}
+
+variable "synapse_spark_cache_size" {
+  description = "Cache size for the Synapse Spark pool."
+  type        = integer
+  default     = 100
+}
+
+variable "synapse_spark_autoscale_min_node_count" {
+  description = "Minimum node count for Spark pool autoscale."
+  type        = integer
+  default     = 3
+}
+
+variable "synapse_spark_autoscale_max_node_count" {
+  description = "Maximum node count for Spark pool autoscale."
+  type        = integer
+  default     = 3
+}
+
+variable "synapse_spark_autopause_delay_in_minutes" {
+  description = "Idle time in minutes before the Spark pool auto-pauses."
+  type        = integer
+  default     = 15
+}
+
 locals {
   storage_account_name = "stsynlab${random_string.storage_suffix.result}"
   filesystem_name      = "synapse"
@@ -108,6 +150,26 @@ resource "azurerm_synapse_workspace" "synapse_lab" {
   tags = azurerm_resource_group.synapse_lab.tags
 }
 
+resource "azurerm_synapse_spark_pool" "synapse_lab" {
+  name                 = var.synapse_spark_pool_name
+  synapse_workspace_id = azurerm_synapse_workspace.synapse_lab.id
+  node_size_family     = var.synapse_spark_node_size_family
+  node_size            = var.synapse_spark_node_size
+  cache_size           = var.synapse_spark_cache_size
+  spark_version        = "3.4"
+
+  auto_scale {
+    min_node_count = var.synapse_spark_autoscale_min_node_count
+    max_node_count = var.synapse_spark_autoscale_max_node_count
+  }
+
+  auto_pause {
+    delay_in_minutes = var.synapse_spark_autopause_delay_in_minutes
+  }
+
+  tags = azurerm_resource_group.synapse_lab.tags
+}
+
 output "resource_group_name" {
   value = azurerm_resource_group.synapse_lab.name
 }
@@ -126,4 +188,8 @@ output "synapse_workspace_name" {
 
 output "synapse_workspace_connectivity_endpoints" {
   value = azurerm_synapse_workspace.synapse_lab.connectivity_endpoints
+}
+
+output "synapse_spark_pool_name" {
+  value = azurerm_synapse_spark_pool.synapse_lab.name
 }
