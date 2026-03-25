@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 3.0"
+    }
     random = {
       source  = "hashicorp/random"
       version = "~> 3.0"
@@ -14,6 +18,10 @@ terraform {
 provider "azurerm" {
   features {}
 }
+
+provider "azuread" {}
+
+data "azurerm_client_config" "current" {}
 
 variable "synapse_workspace_name" {
   description = "Name of the Azure Synapse workspace."
@@ -67,6 +75,18 @@ variable "synapse_workspace_firewall_end_ip_address" {
   description = "End IP address for the Synapse workspace firewall rule."
   type        = string
   default     = "178.255.71.207"
+}
+
+variable "synapse_lab_group_display_name" {
+  description = "Display name of the Entra ID group used for human access to the lab."
+  type        = string
+  default     = "sg-synapse-lab-users"
+}
+
+variable "synapse_lab_group_mail_nickname" {
+  description = "Mail nickname for the Entra ID group used for human access to the lab."
+  type        = string
+  default     = "sgsynapselabusers"
 }
 
 variable "synapse_spark_pool_name" {
@@ -175,6 +195,29 @@ resource "azurerm_synapse_firewall_rule" "current_client" {
   end_ip_address       = var.synapse_workspace_firewall_end_ip_address
 }
 
+resource "azuread_group" "synapse_lab_users" {
+  display_name     = var.synapse_lab_group_display_name
+  mail_nickname    = var.synapse_lab_group_mail_nickname
+  security_enabled = true
+}
+
+resource "azuread_group_member" "current_user" {
+  group_object_id  = azuread_group.synapse_lab_users.object_id
+  member_object_id = data.azurerm_client_config.current.object_id
+}
+
+resource "azurerm_role_assignment" "synapse_workspace_storage_blob_data_contributor" {
+  scope                = azurerm_storage_account.synapse_lab.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_synapse_workspace.synapse_lab.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "synapse_lab_group_storage_blob_data_contributor" {
+  scope                = azurerm_storage_account.synapse_lab.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azuread_group.synapse_lab_users.object_id
+}
+
 resource "azurerm_synapse_spark_pool" "synapse_lab" {
   name                 = var.synapse_spark_pool_name
   synapse_workspace_id = azurerm_synapse_workspace.synapse_lab.id
@@ -203,12 +246,24 @@ output "storage_account_name" {
   value = azurerm_storage_account.synapse_lab.name
 }
 
+output "current_user_object_id" {
+  value = data.azurerm_client_config.current.object_id
+}
+
+output "synapse_lab_group_object_id" {
+  value = azuread_group.synapse_lab_users.object_id
+}
+
 output "data_lake_filesystem_name" {
   value = azurerm_storage_data_lake_gen2_filesystem.synapse.name
 }
 
 output "synapse_workspace_name" {
   value = azurerm_synapse_workspace.synapse_lab.name
+}
+
+output "synapse_workspace_principal_id" {
+  value = azurerm_synapse_workspace.synapse_lab.identity[0].principal_id
 }
 
 output "synapse_workspace_connectivity_endpoints" {

@@ -6,6 +6,9 @@ This repo now covers the current foundation of the Synapse lab with Terraform:
 - the storage account configured for ADLS Gen2
 - the filesystem the Synapse workspace will later use as its default data lake
 - the Synapse workspace itself
+- storage RBAC for the Synapse workspace managed identity
+- an Entra ID security group for lab users
+- storage RBAC for the lab user group
 - the Synapse Spark pool for notebook execution
 
 ## What This Creates
@@ -20,6 +23,9 @@ This repo now covers the current foundation of the Synapse lab with Terraform:
 - Synapse managed resource group: from `synapse_managed_resource_group_name`
 - Synapse managed virtual network: `true` by default
 - Synapse workspace firewall rule: current client IP
+- Storage RBAC: `Storage Blob Data Contributor` for the workspace managed identity
+- Entra ID lab group: from `synapse_lab_group_display_name`
+- Storage RBAC: `Storage Blob Data Contributor` for the lab user group
 - Spark pool: from `synapse_spark_pool_name`
 - Spark pool size: `Small` memory-optimized nodes
 - Spark pool auto-pause: `15` minutes
@@ -44,7 +50,7 @@ az account set --subscription "<subscription-id-or-name>"
 
 ## Files
 
-- `main.tf`: Terraform configuration for the resource group, storage account, ADLS Gen2 filesystem, Synapse workspace, and Spark pool
+- `main.tf`: Terraform configuration for the resource group, storage account, ADLS Gen2 filesystem, Synapse workspace, Entra ID lab group, storage RBAC, firewall rule, and Spark pool
 - `scripts/rg.sh`: Helper script for Terraform create/destroy operations
 
 ## Synapse Workspace Variables
@@ -60,6 +66,8 @@ The Terraform uses these workspace inputs:
 - `synapse_workspace_firewall_rule_name`
 - `synapse_workspace_firewall_start_ip_address`
 - `synapse_workspace_firewall_end_ip_address`
+- `synapse_lab_group_display_name`
+- `synapse_lab_group_mail_nickname`
 - `synapse_spark_pool_name`
 - `synapse_spark_node_size_family`
 - `synapse_spark_node_size`
@@ -78,6 +86,8 @@ Then edit `terraform.tfvars` and set a strong value for `synapse_sql_admin_passw
 
 The lab defaults to `synapse_managed_virtual_network_enabled = true` so the workspace is ready for managed private endpoints and tighter network isolation later.
 The lab also expects a Synapse workspace firewall rule for your client IP if you are accessing Synapse Studio over the public endpoint.
+The workspace managed identity is granted `Storage Blob Data Contributor` on the storage account so pipeline and service-side operations can access the default ADLS Gen2 filesystem.
+The lab creates an Entra ID security group, adds the current signed-in user to it, and grants that group `Storage Blob Data Contributor` on the storage account so interactive notebook runs can be taught and shared without relying on per-user role assignments.
 
 ## Dependency Order
 
@@ -87,6 +97,9 @@ The resources are now built in this order:
 - storage account
 - ADLS Gen2 filesystem
 - Synapse workspace
+- storage RBAC for workspace managed identity
+- Entra ID lab group
+- storage RBAC for lab user group
 - Synapse workspace firewall rule
 - Synapse Spark pool
 
