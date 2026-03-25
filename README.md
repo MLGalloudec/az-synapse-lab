@@ -19,6 +19,7 @@ This repo now covers the current foundation of the Synapse lab with Terraform:
 - Synapse workspace: from `synapse_workspace_name`
 - Synapse managed resource group: from `synapse_managed_resource_group_name`
 - Synapse managed virtual network: `true` by default
+- Synapse workspace firewall rule: current client IP
 - Spark pool: from `synapse_spark_pool_name`
 - Spark pool size: `Small` memory-optimized nodes
 - Spark pool auto-pause: `15` minutes
@@ -56,6 +57,9 @@ The Terraform uses these workspace inputs:
 - `synapse_sql_admin_password`
 - `synapse_managed_virtual_network_enabled`
 - `synapse_public_network_access_enabled`
+- `synapse_workspace_firewall_rule_name`
+- `synapse_workspace_firewall_start_ip_address`
+- `synapse_workspace_firewall_end_ip_address`
 - `synapse_spark_pool_name`
 - `synapse_spark_node_size_family`
 - `synapse_spark_node_size`
@@ -73,6 +77,7 @@ cp terraform.tfvars.example terraform.tfvars
 Then edit `terraform.tfvars` and set a strong value for `synapse_sql_admin_password`.
 
 The lab defaults to `synapse_managed_virtual_network_enabled = true` so the workspace is ready for managed private endpoints and tighter network isolation later.
+The lab also expects a Synapse workspace firewall rule for your client IP if you are accessing Synapse Studio over the public endpoint.
 
 ## Dependency Order
 
@@ -82,6 +87,7 @@ The resources are now built in this order:
 - storage account
 - ADLS Gen2 filesystem
 - Synapse workspace
+- Synapse workspace firewall rule
 - Synapse Spark pool
 
 ## Usage

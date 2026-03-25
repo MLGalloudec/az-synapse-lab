@@ -51,6 +51,24 @@ variable "synapse_public_network_access_enabled" {
   default     = true
 }
 
+variable "synapse_workspace_firewall_rule_name" {
+  description = "Name of the Synapse workspace firewall rule for client access."
+  type        = string
+  default     = "allow-current-client-ip"
+}
+
+variable "synapse_workspace_firewall_start_ip_address" {
+  description = "Start IP address for the Synapse workspace firewall rule."
+  type        = string
+  default     = "178.255.71.207"
+}
+
+variable "synapse_workspace_firewall_end_ip_address" {
+  description = "End IP address for the Synapse workspace firewall rule."
+  type        = string
+  default     = "178.255.71.207"
+}
+
 variable "synapse_spark_pool_name" {
   description = "Name of the Synapse Spark pool."
   type        = string
@@ -150,6 +168,13 @@ resource "azurerm_synapse_workspace" "synapse_lab" {
   tags = azurerm_resource_group.synapse_lab.tags
 }
 
+resource "azurerm_synapse_firewall_rule" "current_client" {
+  name                 = var.synapse_workspace_firewall_rule_name
+  synapse_workspace_id = azurerm_synapse_workspace.synapse_lab.id
+  start_ip_address     = var.synapse_workspace_firewall_start_ip_address
+  end_ip_address       = var.synapse_workspace_firewall_end_ip_address
+}
+
 resource "azurerm_synapse_spark_pool" "synapse_lab" {
   name                 = var.synapse_spark_pool_name
   synapse_workspace_id = azurerm_synapse_workspace.synapse_lab.id
@@ -188,6 +213,10 @@ output "synapse_workspace_name" {
 
 output "synapse_workspace_connectivity_endpoints" {
   value = azurerm_synapse_workspace.synapse_lab.connectivity_endpoints
+}
+
+output "synapse_workspace_firewall_rule_name" {
+  value = azurerm_synapse_firewall_rule.current_client.name
 }
 
 output "synapse_spark_pool_name" {
