@@ -42,7 +42,7 @@ variable "synapse_sql_admin_password" {
 variable "synapse_managed_virtual_network_enabled" {
   description = "Whether to enable the Synapse managed virtual network."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "synapse_public_network_access_enabled" {
@@ -90,6 +90,24 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "synapse" {
   storage_account_id = azurerm_storage_account.synapse_lab.id
 }
 
+resource "azurerm_synapse_workspace" "synapse_lab" {
+  name                                 = var.synapse_workspace_name
+  resource_group_name                  = azurerm_resource_group.synapse_lab.name
+  location                             = azurerm_resource_group.synapse_lab.location
+  storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapse.id
+  managed_resource_group_name          = var.synapse_managed_resource_group_name
+  managed_virtual_network_enabled      = var.synapse_managed_virtual_network_enabled
+  public_network_access_enabled        = var.synapse_public_network_access_enabled
+  sql_administrator_login              = var.synapse_sql_admin_login
+  sql_administrator_login_password     = var.synapse_sql_admin_password
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  tags = azurerm_resource_group.synapse_lab.tags
+}
+
 output "resource_group_name" {
   value = azurerm_resource_group.synapse_lab.name
 }
@@ -100,4 +118,12 @@ output "storage_account_name" {
 
 output "data_lake_filesystem_name" {
   value = azurerm_storage_data_lake_gen2_filesystem.synapse.name
+}
+
+output "synapse_workspace_name" {
+  value = azurerm_synapse_workspace.synapse_lab.name
+}
+
+output "synapse_workspace_connectivity_endpoints" {
+  value = azurerm_synapse_workspace.synapse_lab.connectivity_endpoints
 }

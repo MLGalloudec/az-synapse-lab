@@ -1,19 +1,23 @@
 # Azure Synapse Lab
 
-This repo now covers the first two infrastructure steps for a Synapse lab with Terraform:
+This repo now covers the current foundation of the Synapse lab with Terraform:
 
 - the resource group
 - the storage account configured for ADLS Gen2
 - the filesystem the Synapse workspace will later use as its default data lake
+- the Synapse workspace itself
 
 ## What This Creates
 
-- Resource group: `rg-synapse-lab-uksouth`
+- Resource group: `rg-synapse-lab-uks`
 - Location: `UK South`
 - Tags: `workload=synapse-lab`, `environment=lab`
 - Storage account: `stsynlab<random-suffix>`
 - ADLS Gen2 enabled: `true`
 - Filesystem: `synapse`
+- Synapse workspace: from `synapse_workspace_name`
+- Synapse managed resource group: from `synapse_managed_resource_group_name`
+- Synapse managed virtual network: `true` by default
 
 The resource group name is fixed and descriptive for the lab. The storage account name includes a random suffix because Azure storage account names must be globally unique.
 
@@ -35,12 +39,12 @@ az account set --subscription "<subscription-id-or-name>"
 
 ## Files
 
-- `main.tf`: Terraform configuration for the resource group, storage account, and ADLS Gen2 filesystem
+- `main.tf`: Terraform configuration for the resource group, storage account, ADLS Gen2 filesystem, and Synapse workspace
 - `scripts/rg.sh`: Helper script for Terraform create/destroy operations
 
-## Variables Prepared For The Next Step
+## Synapse Workspace Variables
 
-The Terraform now also defines the Synapse workspace inputs that will be used in the next increment:
+The Terraform uses these workspace inputs:
 
 - `synapse_workspace_name`
 - `synapse_managed_resource_group_name`
@@ -57,15 +61,26 @@ cp terraform.tfvars.example terraform.tfvars
 
 Then edit `terraform.tfvars` and set a strong value for `synapse_sql_admin_password`.
 
+The lab defaults to `synapse_managed_virtual_network_enabled = true` so the workspace is ready for managed private endpoints and tighter network isolation later.
+
+## Dependency Order
+
+The resources are now built in this order:
+
+- resource group
+- storage account
+- ADLS Gen2 filesystem
+- Synapse workspace
+
 ## Usage
 
-Create the resource group:
+Create or update the lab infrastructure:
 
 ```bash
 ./scripts/rg.sh create
 ```
 
-Destroy the resource group:
+Destroy the lab infrastructure:
 
 ```bash
 ./scripts/rg.sh destroy
