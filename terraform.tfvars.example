@@ -1,0 +1,6 @@
+synapse_workspace_name                  = "synwksynlabuks001"
+synapse_managed_resource_group_name     = "rg-synapse-managed-uksouth"
+synapse_sql_admin_login                 = "sqladminsynlab"
+synapse_sql_admin_password              = "ReplaceWithAStrongPassword123!"
+synapse_managed_virtual_network_enabled = false
+synapse_public_network_access_enabled   = true

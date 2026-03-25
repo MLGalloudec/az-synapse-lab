@@ -38,6 +38,25 @@ az account set --subscription "<subscription-id-or-name>"
 - `main.tf`: Terraform configuration for the resource group, storage account, and ADLS Gen2 filesystem
 - `scripts/rg.sh`: Helper script for Terraform create/destroy operations
 
+## Variables Prepared For The Next Step
+
+The Terraform now also defines the Synapse workspace inputs that will be used in the next increment:
+
+- `synapse_workspace_name`
+- `synapse_managed_resource_group_name`
+- `synapse_sql_admin_login`
+- `synapse_sql_admin_password`
+- `synapse_managed_virtual_network_enabled`
+- `synapse_public_network_access_enabled`
+
+For local development, copy the example variables file and set your own values:
+
+```bash
+cp terraform.tfvars.example terraform.tfvars
+```
+
+Then edit `terraform.tfvars` and set a strong value for `synapse_sql_admin_password`.
+
 ## Usage
 
 Create the resource group:

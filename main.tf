@@ -15,13 +15,49 @@ provider "azurerm" {
   features {}
 }
 
+variable "synapse_workspace_name" {
+  description = "Name of the Azure Synapse workspace."
+  type        = string
+  default     = "synwksynlabuks001"
+}
+
+variable "synapse_managed_resource_group_name" {
+  description = "Name of the managed resource group created for the Synapse workspace."
+  type        = string
+  default     = "rg-synapse-managed-uksouth"
+}
+
+variable "synapse_sql_admin_login" {
+  description = "Administrator login for the Synapse workspace SQL endpoint."
+  type        = string
+  default     = "sqladminsynlab"
+}
+
+variable "synapse_sql_admin_password" {
+  description = "Administrator password for the Synapse workspace SQL endpoint."
+  type        = string
+  sensitive   = true
+}
+
+variable "synapse_managed_virtual_network_enabled" {
+  description = "Whether to enable the Synapse managed virtual network."
+  type        = bool
+  default     = false
+}
+
+variable "synapse_public_network_access_enabled" {
+  description = "Whether public network access is enabled for the Synapse workspace."
+  type        = bool
+  default     = true
+}
+
 locals {
   storage_account_name = "stsynlab${random_string.storage_suffix.result}"
   filesystem_name      = "synapse"
 }
 
 resource "azurerm_resource_group" "synapse_lab" {
-  name     = "rg-synapse-lab-uksouth"
+  name     = "rg-synapse-lab-uks"
   location = "UK South"
 
   tags = {
