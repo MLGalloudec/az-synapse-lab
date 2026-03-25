@@ -71,25 +71,25 @@ variable "synapse_spark_node_size" {
 
 variable "synapse_spark_cache_size" {
   description = "Cache size for the Synapse Spark pool."
-  type        = integer
+  type        = number
   default     = 100
 }
 
 variable "synapse_spark_autoscale_min_node_count" {
   description = "Minimum node count for Spark pool autoscale."
-  type        = integer
+  type        = number
   default     = 3
 }
 
 variable "synapse_spark_autoscale_max_node_count" {
   description = "Maximum node count for Spark pool autoscale."
-  type        = integer
+  type        = number
   default     = 3
 }
 
 variable "synapse_spark_autopause_delay_in_minutes" {
   description = "Idle time in minutes before the Spark pool auto-pauses."
-  type        = integer
+  type        = number
   default     = 15
 }
 
